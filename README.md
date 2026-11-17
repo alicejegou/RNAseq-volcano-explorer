@@ -1,2 +1,157 @@
-# RNAseq-volcano-explorer
-A R shiny page allowing you to play with you DESeq2 formatted results (interactive volcano plot) 
+# Volcano explorer
+
+Interactive web tool to overlay several DESeq2 results on a single volcano
+plot, highlight genes of interest and link them across experiments.
+
+Everything runs **in your browser**: nothing to install, no server, and your
+data never leave your computer.
+
+**Live app:** `https://<user>.github.io/<repo>/` *(replace with your own link)*
+
+## What it does
+
+- Upload a **base** DESeq2 table and any number of **overlay** tables.
+- All experiments are drawn on the same volcano plot. Genes passing the
+  padj / log2FC thresholds (DEG) are drawn more opaque.
+- **Highlight genes**: paste your own list, or pick the DEG common to all
+  experiments, or the top N DEG of the base experiment (by padj or by
+  |log2FC|). Segments link the same gene across experiments and each gene
+  is labelled.
+- **Hover** a point to see the gene, the experiment, the log2FC and the padj.
+- A **table** lists the highlighted genes with their values in every
+  experiment. Hovering a table row circles the gene on the plot, and
+  hovering a point highlights its row in the table.
+- **Lasso / box select** points on the plot to get them in their own table.
+- Customise the **legend names**, **colors**, **thresholds** and **axis
+  limits**.
+- **Export** the plot (PNG) and the tables (CSV).
+
+## Quick start
+
+1. Open the app.
+2. Upload your **base experiment** (a DESeq2 results table).
+3. Upload one or more **overlay experiments**. Use *Clear overlay* or
+   *Clear all* to start over without reloading the page.
+4. Add genes to highlight: paste them in the box (one per line, or separated
+   by spaces, commas or semicolons) or upload a text file.
+5. Adjust colors, legend names, thresholds and axis limits in the side panel.
+6. Export the plot and the tables.
+
+## Input format
+
+DESeq2 results as a **CSV or TSV** file (comma, tab or semicolon separated).
+Each file needs three things: a gene ID column, a log2 fold change column
+and an adjusted p-value column.
+
+```csv
+"","baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"
+"gene_A",1807.5,-6.1,0.25,-24.1,3.9e-128,6.4e-124
+"gene_B",1277.0,-6.1,0.27,-22.2,9.7e-109,8.0e-105
+```
+
+- The columns are **detected automatically for each file**. If a guess is
+  wrong, open the **Columns** menu of that experiment and pick the right
+  ones.
+- Tables written with `write.table` (gene IDs as row names, no header for
+  the first column) are supported.
+- Gene IDs must use **the same format in every file** for genes to match.
+- The file name is used as the experiment name. You can rename it in the
+  **Legend name** field.
+
+## Choosing the genes to highlight
+
+| Mode | What is highlighted |
+|---|---|
+| My gene list | The genes you paste or upload |
+| DEG common to all experiments | Genes passing both thresholds in every loaded experiment |
+| Top N DEG of base, by padj | The N most significant DEG of the base experiment |
+| Top N DEG of base, by \|log2FC\| | The N DEG with the largest fold change in the base experiment |
+
+The optional **Restrict to genes of a list** field keeps only the genes of a
+list (for example genes with a ChIP/DAP peak) in every experiment.
+
+## Selecting points with the lasso
+
+1. In the toolbar at the top right of the plot, click the **lasso** or **box
+   select** icon.
+2. Draw around the points of interest.
+3. The genes appear in the **Selected on the plot** table, with their values
+   in all experiments. Download them with **Selected on plot (.csv)**.
+4. **Use selection as gene list** sends them to the highlight list, which
+   adds labels and links across experiments.
+5. **Clear selection** resets the selection.
+
+A selection returns genes, not individual points: selecting a gene in one
+experiment gives you its values in all experiments.
+
+## Exports
+
+| Button | Content |
+|---|---|
+| Plot (.png) | Static version of the plot |
+| Highlighted genes (.csv) | Crossing table of the highlighted genes |
+| Selected on plot (.csv) | Merged table of the lasso selection |
+| Full merged table (.csv) | All genes, with log2FC, padj and DEG status of every experiment |
+
+## Known limitations
+
+- Genes with a padj of `NA` or 0 cannot be drawn on a volcano plot. They stay
+  in the tables, and the *status* column tells when a gene is missing from an
+  experiment.
+- The first load is slow: the browser downloads R and its packages, then
+  keeps them in cache.
+- Very large tables can be slow or exhaust the browser memory.
+- Labels of the interactive plot can overlap when many genes are highlighted.
+  Hover a point to read its name.
+- If the PNG download fails in your browser, use the camera icon in the
+  toolbar of the plot.
+
+## Run it locally
+
+```r
+install.packages(c("shiny", "ggplot2", "dplyr", "scales", "plotly"))
+shiny::runApp("app")
+```
+
+## Repository structure
+
+```
+.
+├── app/
+│   └── app.R      # the application (single file)
+├── docs/          # generated by shinylive::export(), served by GitHub Pages
+└── README.md
+```
+
+## For maintainers: update the online app
+
+After editing `app/app.R`, re-export the site and push it:
+
+```r
+install.packages("shinylive")   # once
+shinylive::export("app", "docs")
+file.create("docs/.nojekyll")
+```
+
+```bash
+git add .
+git commit -m "Update app"
+git push
+```
+
+GitHub Pages must be set to deploy from the `main` branch, `/docs` folder
+(*Settings > Pages*). To preview the exported site before publishing:
+
+```r
+httpuv::runStaticServer("docs")
+```
+
+## Privacy
+
+The app is exported with [Shinylive](https://posit-dev.github.io/r-shinylive/),
+which runs R inside your browser. Uploaded files are processed locally and are
+never sent to any server.
+
+## Author and license
+
+*To be completed.*
