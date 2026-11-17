@@ -6,7 +6,7 @@ plot, highlight genes of interest and link them across experiments.
 Everything runs **in your browser**: nothing to install, no server, and your
 data never leave your computer.
 
-**Live app:** `https://<user>.github.io/<repo>/` *(replace with your own link)*
+**Live app:** `https://alicejegou.github.io/RNAseq-volcano-explorer/`
 
 ## What it does
 
@@ -152,6 +152,3 @@ The app is exported with [Shinylive](https://posit-dev.github.io/r-shinylive/),
 which runs R inside your browser. Uploaded files are processed locally and are
 never sent to any server.
 
-## Author and license
-
-*To be completed.*
